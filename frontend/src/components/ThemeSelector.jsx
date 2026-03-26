@@ -5,7 +5,6 @@ import { Context } from "../context/Context";
 
 export const ThemeSelector = () => {
   const { theme, setTheme } = useContext(Context);
-  console.log(theme);
   return (
     <div className="dropdown dropdown-end">
       <button tabIndex={2} className="btn btn-ghost btn-circle">
@@ -19,7 +18,7 @@ export const ThemeSelector = () => {
               localStorage.setItem("preferred-theme", themeOption.name);
               setTheme(themeOption.name);
             }}
-            className={`w-full px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${theme === themeOption.name ? "bg-primary/10 text-primary" : "hover:bg-content"}`}
+            className={`w-full cursor-pointer hover: px-4 py-3 rounded-xl flex items-center gap-3 transition-colors ${theme === themeOption.name ? "bg-primary/10 text-primary" : "hover:bg-primary/10 hover:text-primary"}`}
           >
             <PaletteIcon className="size-4" />
             <p className="text-sm  font-medium">{themeOption.label}</p>

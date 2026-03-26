@@ -1,5 +1,6 @@
 import arcjet, { tokenBucket, shield, detectBot } from "@arcjet/node";
 import "dotenv/config";
+
 // init arcjet
 export const aj = arcjet({
   key: process.env.ARCJET_KEY,
@@ -21,3 +22,39 @@ export const aj = arcjet({
     }),
   ],
 });
+
+export const rateLimiter = async (req, res, next) => {
+  try {
+    const decison = await aj.protect(req, {
+      requested: 1, // specifies tha each request consumes 1 token
+    });
+    if (decison.isDenied()) {
+      if (decison.reason.isRateLimit()) {
+        res.status(429).json({
+          error: "Too Many Requests",
+        });
+      } else if (decison.reason.isBot()) {
+        res.status(403).json({
+          error: "Bot access denied",
+        });
+      } else {
+        res.status(403).json({
+          error: "Forbidden",
+        });
+      }
+      return;
+    }
+    // check for spoofed bots
+    if (
+      decison.results.some(
+        (result) => result.reason.isBot() && result.reason.isSpoofed(),
+      )
+    ) {
+      res.status(403).json({ error: "Spoofed bot detected" });
+      return;
+    }
+    next();
+  } catch (err) {
+    console.log("Arcjet error", err);
+  }
+};
